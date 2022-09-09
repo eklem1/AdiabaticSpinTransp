@@ -124,6 +124,7 @@ ax.set_zlim(-1,1)
 ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_zlabel('z')
+ax.view_init(elev=30., azim=60)
 
 line,=ax.plot(sx_save[:1],sy_save[:1],sz_save[:1], color='tomato')
 line2,=ax.plot(sx_perfect[:1],sy_perfect[:1],sz_perfect[:1], color='royalblue')

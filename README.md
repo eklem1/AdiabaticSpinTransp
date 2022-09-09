@@ -10,7 +10,7 @@ Rev. Mod. Phys. 26, 167 (1954).
 
 https://doi.org/10.1103/RevModPhys.26.167
 
-The calculation is based on Equation (12). 
+The calculation is based on Equation (12). For a more extensive list of references see the LaTeX document. The exact analytic solution is derived and plotted, as well as a plot of the solution found using Runge-Kutta integration.
 
 ----
 
@@ -20,7 +20,7 @@ Initially, the spin points along the +y direction, and so does the magnetic fiel
 <img align="middle" src="./Photos/frames.jpg" width="700" title="Different frames of reference" />  
 </p>
 
-For a full explanation of the theory see [Adiabtic_Transport_theory_work.pdf](https://github.com/eklem1/AdiabaticSpinTransp/blob/master/Adiabatic_Transport_theory_work.pdf) or the working the Overleaf document at https://www.overleaf.com/read/rfkkhhwwfjct.
+For a full explanation of the theory see [Adiabtic_Transport_theory_work.pdf](https://github.com/eklem1/AdiabaticSpinTransp/blob/master/Adiabatic_Transport_theory_work.pdf) or the working LaTeX document at https://www.overleaf.com/read/rfkkhhwwfjct.
 
 ## [RotationTransformations.ipynb](https://github.com/eklem1/AdiabaticSpinTransp/blob/master/RotationTransformations.ipynb)
 This notebook containts the analytic work for solving Bloch's equation from a doubly rotating frame of reference where the Bloch equation is trivial to solve. Then using the intial condition of the polarization vector, the full time dependant solution is transformed back into the lab frame.
