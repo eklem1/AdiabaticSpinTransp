@@ -34,3 +34,6 @@ Derivation by Jeff Martin for solving in only the singly rotating reference fram
 ## [asr.py](https://github.com/eklem1/AdiabaticSpinTransp/blob/master/asr.py) & [asr_rk.py](https://github.com/eklem1/AdiabaticSpinTransp/blob/master/asr_rk.py)
 
 These files compares the actual spin dynamics with the adiabatic limit.
+
+## [AdiabaticParameterRequirements.ipynb](https://github.com/eklem1/AdiabaticSpinTransp/blob/master/AdiabaticParameterRequirements.ipynb)
+This notebook containts numerical work looking at the minimum requirements for the adiabaticity condition being fulfilled.
