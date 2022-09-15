@@ -107,8 +107,6 @@ sx_perfect = np.array(sx_perfect)
 sy_perfect = np.array(sy_perfect)
 sz_perfect = np.array(sz_perfect)
 
-# print(b_save[0][2])
-
 #plt.plot(t_save,sx_save)
 #plt.plot(t_save,sy_save)
 #plt.plot(t_save,sz_save)
@@ -133,6 +131,7 @@ a2=Arrow3D([0,sx_perfect[0]],[0,sy_perfect[0]],[0,sz_perfect[0]],mutation_scale=
 ax.add_artist(a)
 ax.add_artist(a2)
 
+#a shift for the arrow showing the B field direction so it can be seen better
 B_shift = [0.75, 0, 0]
 
 B1=Arrow3D([B_shift[0],b_save[0][0]+B_shift[0]],[0,b_save[0][1]],[0,b_save[0][2]],mutation_scale=15,arrowstyle="Fancy",color="orange")

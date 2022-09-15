@@ -68,47 +68,32 @@ N=abs(int(omega_eff/Omega*10))
 
 print(N)
 
-# def spin_rot(t): #not sure what this is for
-#     sx=sintheta**2*np.cos(omega*t)+costheta**2
-#     sy=sintheta*np.sin(omega*t)
-#     sz=sintheta*costheta*(np.cos(omega*t)-1)
-#     return sx,sy,sz
-
-
 def spinR2(t): # P(t) in the rotating frame (F_rot2), as a function of a, beta and Omega
 
     sx=-sinbeta*np.cos(omega_eff*t)
-
     sy=cosbeta +0*t
-
     sz=-sinbeta*np.sin(omega_eff*t)
     return sx,sy,sz
 
 def spinR(t): # P(t) in the single rotating frame (F_rot2), as a function of a, beta and Omega
 
     sx=sinbeta*cosbeta*(1 - np.cos(omega_eff*t))
-
     sy=sinbeta**2*np.cos(omega_eff*t)+cosbeta**2
-
     sz=-sinbeta*np.sin(omega_eff*t)
     return sx,sy,sz
 
 def spin(t): # P(t) in the non-rotating frame (F_UCN), as a function of a, beta and Omega
 
     sx=sinbeta*cosbeta*(1 - np.cos(omega_eff*t))
-
     sy=(sinbeta**2*np.cos(omega_eff*t)+cosbeta**2)*np.cos(Omega*t)+sinbeta*np.sin(omega_eff*t)*np.sin(Omega*t)
-
     sz=(sinbeta**2*np.cos(omega_eff*t)+cosbeta**2)*np.sin(Omega*t)-sinbeta*np.sin(omega_eff*t)*np.cos(Omega*t)
     return sx,sy,sz
-
 
 def spin_perfect(t): # non-rotating frame, but assuming perfect adiabatic
     sx=0*t
     sy=np.cos(Omega*t)
     sz=np.sin(Omega*t)
     return sx,sy,sz
-
 
 def b(t):
     bx=0*t
@@ -152,6 +137,7 @@ def update_multi(num):
 
     return [line,line2,a2,a,B1_ar, line_r, line_r2, a_r, a_r2]
 
+#plotting
 fig = plt.figure()
 
 fig.suptitle("Precession in a rotating magnetic field \n"+
@@ -212,6 +198,7 @@ if multiplot:
     a_r2=Arrow3D([0,sx_r2[0]],[0,sy_r2[0]],[0,sz_r2[0]],mutation_scale=20,arrowstyle="-|>",color="r")
     ax3.add_artist(a_r2)
 
+    #a shift for the arrow showing the B field direction so it can be seen better
     B_shift = [0.75, 0, 0]
 
     B1_ar=Arrow3D([B_shift[0],b_save[0][0]+B_shift[0]],[0,b_save[0][1]],[0,b_save[0][2]],mutation_scale=15,arrowstyle="Fancy",color="orange")
@@ -247,6 +234,7 @@ else:
     ax.add_artist(a)
     ax.add_artist(a2)
 
+    #a shift for the arrow showing the B field direction so it can be seen better
     B_shift = [0.75, 0, 0]
 
     B1_ar=Arrow3D([B_shift[0],b_save[0][0]+B_shift[0]],[0,b_save[0][1]],[0,b_save[0][2]],mutation_scale=15,arrowstyle="Fancy",color="orange")
@@ -258,6 +246,3 @@ else:
     ani.save('asr.mp4')
 
 plt.show()
-
-# writergif = animation.PillowWriter(fps=30)
-# ani.save('filename.gif',writer=writergif)
