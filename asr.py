@@ -37,7 +37,7 @@ gamma=gamma/1e6 # rad/s/uT
 
 # Set the field and rate at which it should change, here.
 B1=1 # uT
-T1=1 # s, time to go around once
+T1=0.8 # s, time to go around once
 
 omegaL = gamma*B1
 Omega = 2*pi/T1 # Hz
@@ -51,7 +51,9 @@ omega_eff = np.sqrt(omegaL**2 + Omega**2)
 cosbeta = -omegaL/omega_eff #the negative here is needed if gamma > 0
 sinbeta = Omega/omega_eff
 
-print(f"B1: {B1} uT, wL: {omegaL}, Omega: {Omega} Hz, omega_eff:{omega_eff}")
+k = omegaL/Omega
+
+print(f"B1: {B1} uT, wL: {omegaL}, Omega: {Omega} Hz, omega_eff:{omega_eff}, k: {k}")
 
 """
 conversion to Jeff's version:
@@ -112,6 +114,11 @@ def update(num):
     a._verts3d=[0,sx[num]],[0,sy[num]],[0,sz[num]]
     a2._verts3d=[0,sx_perfect[num]],[0,sy_perfect[num]],[0,sz_perfect[num]]
     B1_ar._verts3d=[B_shift[0],b_save[num][0]+B_shift[0]],[0,b_save[num][1]],[0,b_save[num][2]]
+
+    #saves a still of the video for a number frame number (magic_value)
+    # magic_value=73
+    # if num == magic_value: fig.savefig(f'fig{num}.pdf')
+
     return [line,line2,a2,a,B1_ar]
 
 #update of plot in time for all frames
@@ -141,7 +148,7 @@ def update_multi(num):
 fig = plt.figure()
 
 fig.suptitle("Precession in a rotating magnetic field \n"+
-    f"$B$: {B1} uT, $\omega_L$: {omegaL:.3}, $\Omega$: {Omega:.3} Hz, "+"$\omega_{eff}$ "+f":{omega_eff:.3}")
+    f"$B$: {B1} $\mu$T, $\omega_L$: {omegaL:.3}, $\Omega$: {Omega:.3} Hz, "+"$\omega_{eff}$ "+f":{omega_eff:.3}, $k$: {k:.3}")
 
 #change this to false if you only want to plot in the lab frame
 multiplot = False
@@ -240,7 +247,7 @@ else:
     B1_ar=Arrow3D([B_shift[0],b_save[0][0]+B_shift[0]],[0,b_save[0][1]],[0,b_save[0][2]],mutation_scale=15,arrowstyle="Fancy",color="orange")
     ax.add_artist(B1_ar)
 
-    ax.legend([a, a2, B1_ar], ['P(t)', 'P(t) perfect', 'B(t)'], title="$F_{lab}$", bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0)
+    ax.legend([a, a2, B1_ar], ['P(t)', '$P_{perfect}(t) $', 'B(t)'], title="$F_{lab}$", bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0)
 
     ani=animation.FuncAnimation(fig,update,frames=N,interval=1,blit=False,repeat=True)
     ani.save('asr.mp4')
