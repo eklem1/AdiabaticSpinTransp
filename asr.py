@@ -36,8 +36,8 @@ gamma=gamma/1e6 # rad/s/uT
 # After cheating by doing RK, I fixed the signs again.
 
 # Set the field and rate at which it should change, here.
-B1=1 # uT
-T1=0.8 # s, time to go around once
+B1=1.5 # uT
+T1=.5# s, time to go around once
 
 omegaL = gamma*B1
 Omega = 2*pi/T1 # Hz
@@ -66,9 +66,9 @@ conversion to Jeff's version:
 # The 100 in the line below should make sure we get about 100 points
 # in each of the revolutions in the rotating frame.
 # N=abs(int(omega/omega1))
-N=abs(int(omega_eff/Omega*10))
+N=abs(int(omega_eff/Omega*10)) #40
 
-print(N)
+print("N: ",N)
 
 def spinR2(t): # P(t) in the rotating frame (F_rot2), as a function of a, beta and Omega
 
@@ -250,6 +250,8 @@ else:
     ax.legend([a, a2, B1_ar], ['P(t)', '$P_{perfect}(t) $', 'B(t)'], title="$F_{lab}$", bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0)
 
     ani=animation.FuncAnimation(fig,update,frames=N,interval=1,blit=False,repeat=True)
-    ani.save('asr.mp4')
+
+    ani.save('./animation2.gif', writer='imagemagick', fps=60)
+    # ani.save('asr.mp4')
 
 plt.show()
