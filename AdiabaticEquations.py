@@ -95,7 +95,7 @@ def pseudoScalar_K_equ3_14_turn(vn, B, dx, k_inf_set=False):
     return K_equ3_14(v_vec, B_1, B_2, r_1, r_2, k_inf_set=k_inf_set)
 
 
-#calculates the k value a field that ic chaing, but assuming the neutron
+#calculates the k value a field that ic changing, but assuming the neutron
 #is moving stright along one axis 
 #for a given neutron speed (vn)
 def pseudoScalar_K_equ3_14(vn, B, x, k_inf_set=False):
@@ -114,3 +114,4 @@ def pseudoScalar_K_equ3_14(vn, B, x, k_inf_set=False):
         K_arr.append(K_equ3_14(v_vec, B_1, B_2, r_1, r_2, k_inf_set=k_inf_set))
 
     return K_arr
+
