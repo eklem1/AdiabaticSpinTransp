@@ -15,7 +15,8 @@ hbar = const.hbar
 
 mu_n = const.physical_constants['neutron mag. mom.'][0] #J T^-1
 g_n = const.physical_constants['neutron mag. mom. to nuclear magneton ratio'][0]
-gamma_n = const.physical_constants['neutron gyromag. ratio'][0] #s^-1 T^-1, negative
+#correction for frequency - should still check this with someone else
+gamma_n = const.physical_constants['neutron gyromag. ratio'][0]/(2*np.pi) #s^-1 T^-1, negative
 
 
 #3.11 in Pierre
