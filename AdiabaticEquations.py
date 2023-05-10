@@ -116,3 +116,14 @@ def pseudoScalar_K_equ3_14(vn, B, x, k_inf_set=False):
 
     return K_arr
 
+
+#from just the B field
+def K_equ14(v_n, B, dB_vec_dy, k_inf_set=False):
+
+    B_norm = LA.norm(B)
+
+    denom  = LA.norm(np.cross(dB_vec_dy, B))
+
+    k = gamma_n*B_norm**3 / (v_n * denom)
+
+    return k
