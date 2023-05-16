@@ -16,16 +16,23 @@ hbar = const.hbar
 mu_n = const.physical_constants['neutron mag. mom.'][0] #J T^-1
 g_n = const.physical_constants['neutron mag. mom. to nuclear magneton ratio'][0]
 #correction for frequency - should still check this with someone else
-gamma_n = const.physical_constants['neutron gyromag. ratio'][0]/(2*np.pi) #s^-1 T^-1, negative
+gamma_n = const.physical_constants['neutron gyromag. ratio'][0] #s^-1 T^-1
+#/(2*np.pi) #s^-1 T^-1, negative
 
 
-#3.11 in Pierre
 def K_equ_dbdt(B, dbdt):
+    #3.11 from https://tel.archives-ouvertes.fr/tel-00726870 by E. Pierre
+
     return gamma_n*B**2 / dbdt
 
-#equation 2 in the CDR - Sect 4.1 for the value of k
-#3.12 in Pierre
 def K_equ_dbdx(B, db_perpdx, v_n):
+    '''
+    equation 2 in the CDR - Sect 4.1 for the value of k
+    3.12 in Pierre from https://tel.archives-ouvertes.fr/tel-00726870 by E. Pierre, 
+    but here I think you are assuming db_par/dx is small 
+    (but not generall true), see K_equ320() for general 
+    '''
+
     return gamma_n*B**2 / (v_n*db_perpdx)
 
 #3.14 in Pierre
@@ -119,6 +126,12 @@ def pseudoScalar_K_equ3_14(vn, B, x, k_inf_set=False):
 
 #from just the B field
 def K_equ14(v_n, B, dB_vec_dy, k_inf_set=False):
+    '''
+    Equation 14 in from https://journals.aps.org/rmp/abstract/10.1103/RevModPhys.26.167
+    by Rabi, N. F. Ramsey, and J. Schwinger
+    But extended for B instead of H.
+    '''
+
 
     B_norm = LA.norm(B)
 
@@ -127,3 +140,81 @@ def K_equ14(v_n, B, dB_vec_dy, k_inf_set=False):
     k = gamma_n*B_norm**3 / (v_n * denom)
 
     return k
+
+
+def K_equ320(v_n, B1, B2, deltaX, k_inf_set=False):
+    '''
+    Equation 3.20 from https://tel.archives-ouvertes.fr/tel-00726870 by E. Pierre, 
+    is suppose to come from 3.12 in Pierre, but I believe this one is more general
+    '''
+    B_norm = LA.norm(B2)
+
+    denom = 0
+
+    for i in [0, 1, 2]:
+        term = B1[i] - B2[i] 
+
+        top = 0
+        for j in [0, 1, 2]:
+            top += B2[j]*(B1[j]-B2[j])
+
+        term -= B2[i]*top / B_norm**2
+
+        denom += term**2
+
+    k = gamma_n*B_norm**2*deltaX[1] / (v_n * np.sqrt(denom))
+
+    return k
+
+
+
+def K_equ3_14Err(vn, B1, B2, y1, y2, sig_B1, sig_B2, sig_y1, sig_y2):
+
+    g_n = gamma_n
+    v_n = vn
+
+    y_1 = y1
+    y_2 = y2
+    B_1x = B1[0]
+    B_1y = B1[1]
+    B_1z = B1[2]
+    B_2x = B2[0]
+    B_2y = B2[1]
+    B_2z = B2[2]
+
+    s_B1x = sig_B1[0]
+    s_B1y = sig_B1[1]
+    s_B1z = sig_B1[2]
+    s_B2x = sig_B2[0]
+    s_B2y = sig_B2[1]
+    s_B2z = sig_B2[2]
+    s_y1 = sig_y1
+    s_y2 = sig_y2
+
+    k_err = g_n**2*s_B1x**2*(y_1 - y_2)**2*(-B_1x*np.sqrt(((B_1x**2 + B_1y**2 + B_1z**2)**1.0*(B_2x**2 + B_2y**2 + B_2z**2)**1.0 -\
+        (B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)**2)/((B_1x**2 + B_1y**2 + B_1z**2)**1.0*(B_2x**2 + B_2y**2 + B_2z**2)**1.0))*(B_1x**2 +\
+        B_1y**2 + B_1z**2)**1.5*(B_2x**2 + B_2y**2 + B_2z**2)**1.0*np.arccos((B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)/((B_1x**2 + B_1y**2 + \
+        B_1z**2)**0.5*(B_2x**2 + B_2y**2 + B_2z**2)**0.5)) + (1.0*B_1x*(B_1x**2 + B_1y**2 + B_1z**2)**0.5*(B_1x*B_2x + B_1y*B_2y + B_1z*B_2z) - \
+        B_2x*(B_1x**2 + B_1y**2 + B_1z**2)**1.5)*np.sqrt(B_1x**2 + B_1y**2 + B_1z**2)*(B_2x**2 + B_2y**2 + B_2z**2)**0.5)**2/(v_n**2*((B_1x**2 + \
+        B_1y**2 + B_1z**2)**1.0*(B_2x**2 + B_2y**2 + B_2z**2)**1.0 - (B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)**2)*(B_1x**2 + B_1y**2 + \
+        B_1z**2)**3.0*(B_2x**2 + B_2y**2 + B_2z**2)**1.0*np.arccos((B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)/((B_1x**2 + B_1y**2 + B_1z**2)**0.5*(B_2x**2 +\
+        B_2y**2 + B_2z**2)**0.5))**4) + g_n**2*s_B1y**2*(y_1 - y_2)**2*(-B_1y*np.sqrt(((B_1x**2 + B_1y**2 + B_1z**2)**1.0*(B_2x**2 + B_2y**2 + \
+        B_2z**2)**1.0 - (B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)**2)/((B_1x**2 + B_1y**2 + B_1z**2)**1.0*(B_2x**2 + B_2y**2 + \
+        B_2z**2)**1.0))*(B_1x**2 + B_1y**2 + B_1z**2)**1.5*(B_2x**2 + B_2y**2 + B_2z**2)**1.0*np.arccos((B_1x*B_2x + B_1y*B_2y + \
+        B_1z*B_2z)/((B_1x**2 + B_1y**2 + B_1z**2)**0.5*(B_2x**2 + B_2y**2 + B_2z**2)**0.5)) + (1.0*B_1y*(B_1x**2 + B_1y**2 + \
+        B_1z**2)**0.5*(B_1x*B_2x + B_1y*B_2y + B_1z*B_2z) - B_2y*(B_1x**2 + B_1y**2 + B_1z**2)**1.5)*np.sqrt(B_1x**2 + B_1y**2 + \
+        B_1z**2)*(B_2x**2 + B_2y**2 + B_2z**2)**0.5)**2/(v_n**2*((B_1x**2 + B_1y**2 + B_1z**2)**1.0*(B_2x**2 + B_2y**2 + \
+        B_2z**2)**1.0 - (B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)**2)*(B_1x**2 + B_1y**2 + B_1z**2)**3.0*(B_2x**2 + B_2y**2 + \
+        B_2z**2)**1.0*np.arccos((B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)/((B_1x**2 + B_1y**2 + B_1z**2)**0.5*(B_2x**2 + B_2y**2 + \
+        B_2z**2)**0.5))**4) + g_n**2*s_B1z**2*(y_1 - y_2)**2*(-B_1z*np.sqrt(((B_1x**2 + B_1y**2 + B_1z**2)**1.0*(B_2x**2 + \
+        B_2y**2 + B_2z**2)**1.0 - (B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)**2)/((B_1x**2 + B_1y**2 + B_1z**2)**1.0*(B_2x**2 + \
+        B_2y**2 + B_2z**2)**1.0))*(B_1x**2 + B_1y**2 + B_1z**2)**1.5*(B_2x**2 + B_2y**2 + B_2z**2)**1.0*np.arccos((B_1x*B_2x + B_1y*B_2y + \
+        B_1z*B_2z)/((B_1x**2 + B_1y**2 + B_1z**2)**0.5*(B_2x**2 + B_2y**2 + B_2z**2)**0.5)) + (1.0*B_1z*(B_1x**2 + B_1y**2 + \
+        B_1z**2)**0.5*(B_1x*B_2x + B_1y*B_2y + B_1z*B_2z) - B_2z*(B_1x**2 + B_1y**2 + B_1z**2)**1.5)*np.sqrt(B_1x**2 + B_1y**2 + B_1z**2)*(B_2x**2 + \
+        B_2y**2 + B_2z**2)**0.5)**2/(v_n**2*((B_1x**2 + B_1y**2 + B_1z**2)**1.0*(B_2x**2 + B_2y**2 + B_2z**2)**1.0 - (B_1x*B_2x + B_1y*B_2y + \
+        B_1z*B_2z)**2)*(B_1x**2 + B_1y**2 + B_1z**2)**3.0*(B_2x**2 + B_2y**2 + B_2z**2)**1.0*np.arccos((B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)/((B_1x**2 +\
+         B_1y**2 + B_1z**2)**0.5*(B_2x**2 + B_2y**2 + B_2z**2)**0.5))**4) + g_n**2*s_B2x**2*(y_1 - y_2)**2*(B_1x*(B_2x**2 + B_2y**2 + \
+        B_2z**2)**1.5 - 1.0*B_2x*(B_2x**2 + B_2y**2 + B_2z**2)**0.5*(B_1x*B_2x + B_1y*B_2y + B_1z*B_2z))**2*(B_1x**2 + B_1y**2 + \
+         B_1z**2)**1.0/(v_n**2*((B_1x**2 + B_1y**2 + B_1z**2)**1.0*(B_2x**2 + B_2y**2 + B_2z**2)**1.0 - (B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)**2)*(B_2x**2 + B_2y**2 + B_2z**2)**3.0*np.arccos((B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)/((B_1x**2 + B_1y**2 + B_1z**2)**0.5*(B_2x**2 + B_2y**2 + B_2z**2)**0.5))**4) + g_n**2*s_B2y**2*(y_1 - y_2)**2*(B_1y*(B_2x**2 + B_2y**2 + B_2z**2)**1.5 - 1.0*B_2y*(B_2x**2 + B_2y**2 + B_2z**2)**0.5*(B_1x*B_2x + B_1y*B_2y + B_1z*B_2z))**2*(B_1x**2 + B_1y**2 + B_1z**2)**1.0/(v_n**2*((B_1x**2 + B_1y**2 + B_1z**2)**1.0*(B_2x**2 + B_2y**2 + B_2z**2)**1.0 - (B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)**2)*(B_2x**2 + B_2y**2 + B_2z**2)**3.0*np.arccos((B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)/((B_1x**2 + B_1y**2 + B_1z**2)**0.5*(B_2x**2 + B_2y**2 + B_2z**2)**0.5))**4) + g_n**2*s_B2z**2*(y_1 - y_2)**2*(B_1z*(B_2x**2 + B_2y**2 + B_2z**2)**1.5 - 1.0*B_2z*(B_2x**2 + B_2y**2 + B_2z**2)**0.5*(B_1x*B_2x + B_1y*B_2y + B_1z*B_2z))**2*(B_1x**2 + B_1y**2 + B_1z**2)**1.0/(v_n**2*((B_1x**2 + B_1y**2 + B_1z**2)**1.0*(B_2x**2 + B_2y**2 + B_2z**2)**1.0 - (B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)**2)*(B_2x**2 + B_2y**2 + B_2z**2)**3.0*np.arccos((B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)/((B_1x**2 + B_1y**2 + B_1z**2)**0.5*(B_2x**2 + B_2y**2 + B_2z**2)**0.5))**4) + g_n**2*s_y1**2*(B_1x**2 + B_1y**2 + B_1z**2)/(v_n**2*np.arccos((B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)/((B_1x**2 + B_1y**2 + B_1z**2)**0.5*(B_2x**2 + B_2y**2 + B_2z**2)**0.5))**2) + g_n**2*s_y2**2*(B_1x**2 + B_1y**2 + B_1z**2)/(v_n**2*np.arccos((B_1x*B_2x + B_1y*B_2y + B_1z*B_2z)/((B_1x**2 + B_1y**2 + B_1z**2)**0.5*(B_2x**2 + B_2y**2 + B_2z**2)**0.5))**2)
+    
+    return np.sqrt(k_err)
