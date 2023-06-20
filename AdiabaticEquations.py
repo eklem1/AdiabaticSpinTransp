@@ -6,6 +6,7 @@ import sympy as sp
 import scipy.constants as const
 from scipy import ndimage
 from numpy import linalg as LA
+from scipy.spatial.transform import Rotation as Rot
 
 #importing physical constants that are useful from scipy.constants
 m_p = const.physical_constants['proton mass energy equivalent in MeV'][0]
@@ -35,6 +36,60 @@ def K_equ_dbdx(B, db_perpdx, v_n):
 
     return gamma_n*B**2 / (v_n*db_perpdx)
 
+
+def K_equ3_12(v_n, B1, B2, deltaX, k_inf_set=False):
+    '''
+    equation 2 in the CDR - Sect 4.1 for the value of k
+    3.12 in Pierre from https://tel.archives-ouvertes.fr/tel-00726870 by E. Pierre, 
+    putting equ. 3.23 in to a 2 point calculation, and not assuming the B field
+    only changes along 2 axes
+    '''
+
+    B = LA.norm(B1)
+   
+    # the angle we rotate by
+    theta = np.arccos(B1.T@B2/(LA.norm(B1)*LA.norm(B2)))
+    
+    omegaVecUnit = np.cross(B1, B2)
+    #make sure the vectors aren't parallel before making it a unit vector
+    if np.array_equal(omegaVecUnit, np.zeros(3)): 
+        omegaVecUnit = omegaVecUnit
+    else:
+        omegaVecUnit /= LA.norm(omegaVecUnit)
+    
+    #arbitrary rotation matrix -> to move B2 to the B1 frame
+    RotMatrix = Rot.from_rotvec(theta*omegaVecUnit).as_matrix()
+    
+    dB_dy_rotFrame = (B2@RotMatrix-B1)/LA.norm(deltaX)
+    
+    #this does not assume that
+    #gets direction angle angle of the angular 'velocity' vector rotation
+    #-> Perp to B1 and B2
+    #but this assumes that B2 is the velocity vector, not the next position vector
+    #instead you need to use the dot produc to get the angle
+    # omegaVec = np.cross(B1, B2)/(LA.norm(B1)*LA.norm(B2)) 
+
+    if np.array_equal(omegaVecUnit, np.zeros(3)): 
+        #vectors are parallel and there is no angular component
+        omegaCrossB = omegaVecUnit
+    else:
+        # print(omegaVecUnit, theta)
+        omega = np.array(omegaVecUnit*theta)/LA.norm(deltaX)
+        omegaCrossB = np.cross(omega, B1)
+    
+    #the absolute value of our total derivative of B
+    dabsB_dy = LA.norm(dB_dy_rotFrame + omegaCrossB)
+
+    if dabsB_dy == 0:
+        if k_inf_set:
+            k = np.inf 
+        else:
+            k = 9e9
+    else:
+        k = gamma_n*B**2 / (v_n*dabsB_dy)
+
+    return k
+
 #3.14 in Pierre
 def K_equ3_14(v_vec, B_1, B_2, r_1, r_2, k_inf_set=False):
     '''
@@ -54,7 +109,7 @@ def K_equ3_14(v_vec, B_1, B_2, r_1, r_2, k_inf_set=False):
     v_n = LA.norm(v_vec)
     B_1_norm = LA.norm(B_1)
     B_2_norm = LA.norm(B_2)
-    
+
     if k_inf_set:
         k_inf=np.inf
     else:
@@ -62,7 +117,7 @@ def K_equ3_14(v_vec, B_1, B_2, r_1, r_2, k_inf_set=False):
     
     #the angle that the field changes by
     if B_1_norm == 0 or B_2_norm == 0: # if either 0 feild == bad, k=0
-        print("Field is 0")
+        # print("Field is 0")
         k = 0
     elif B_1_norm*B_2_norm == 0: 
         '''
@@ -75,7 +130,7 @@ def K_equ3_14(v_vec, B_1, B_2, r_1, r_2, k_inf_set=False):
         k = k_inf
         
     elif B_1@B_2/(B_1_norm*B_2_norm) >= 1.0: 
-        # print(B_1_norm, B_2_norm)
+        # print(B_1@B_2/(B_1_norm*B_2_norm))
         k = k_inf
     else:
         theta = np.arccos(B_1@B_2/(B_1_norm*B_2_norm))
@@ -103,7 +158,7 @@ def pseudoScalar_K_equ3_14_turn(vn, B, dx, k_inf_set=False):
     return K_equ3_14(v_vec, B_1, B_2, r_1, r_2, k_inf_set=k_inf_set)
 
 
-#calculates the k value a field that ic changing, but assuming the neutron
+#calculates the k value a field that is changing, but assuming the neutron
 #is moving stright along one axis 
 #for a given neutron speed (vn)
 def pseudoScalar_K_equ3_14(vn, B, x, k_inf_set=False):
@@ -113,7 +168,7 @@ def pseudoScalar_K_equ3_14(vn, B, x, k_inf_set=False):
     
         v_vec = np.array([vn, 0, 0])
         B_1 = np.array([B[i], 0, 0])
-        B_2 = np.array([0, x[i+1], 0])
+        B_2 = np.array([0, B[i+1], 0])
 
         r_1 = np.array([x[i], 0, 0]) 
         r_2 = np.array([x[i+1], 0, 0])
