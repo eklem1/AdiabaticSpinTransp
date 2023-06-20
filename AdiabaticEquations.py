@@ -73,8 +73,13 @@ def K_equ3_12(v_n, B1, B2, deltaX, k_inf_set=False):
         #vectors are parallel and there is no angular component
         omegaCrossB = omegaVecUnit
     else:
-        # print(omegaVecUnit, theta)
-        omega = np.array(omegaVecUnit*theta)/LA.norm(deltaX)
+        #For cosine version, k=max at 180
+        omegaVec = np.cross(B1, B2)/(LA.norm(B1)*LA.norm(B2)) 
+        omega = np.array(omegaVec)/LA.norm(deltaX)
+        
+        #for cosine version k=min at 180
+        # omega = np.array(theta*omegaVecUnit)/LA.norm(deltaX)
+        
         omegaCrossB = np.cross(omega, B1)
     
     #the absolute value of our total derivative of B
