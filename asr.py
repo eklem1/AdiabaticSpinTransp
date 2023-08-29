@@ -247,7 +247,7 @@ else:
     B1_ar=Arrow3D([B_shift[0],b_save[0][0]+B_shift[0]],[0,b_save[0][1]],[0,b_save[0][2]],mutation_scale=15,arrowstyle="Fancy",color="orange")
     ax.add_artist(B1_ar)
 
-    ax.legend([a, a2, B1_ar], ['P(t)', '$P_{perfect}(t) $', 'B(t)'], title="$F_{lab}$", bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0)
+    ax.legend([a, a2, B1_ar], ['P(t)', '$P_{perfect}(t) $', 'B(t)'], title="$F_{lab}$", zzbbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0)
 
     ani=animation.FuncAnimation(fig,update,frames=N,interval=1,blit=False,repeat=True)
 

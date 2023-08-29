@@ -45,7 +45,8 @@ def K_equ3_12(v_n, B1, B2, deltaX, k_inf_set=False):
     only changes along 2 axes
     '''
 
-    B = LA.norm(B1)
+    # B = LA.norm(B1)
+    B = (LA.norm(B1) + LA.norm(B2)) /2
    
     # the angle we rotate by
     theta = np.arccos(B1.T@B2/(LA.norm(B1)*LA.norm(B2)))
@@ -111,7 +112,8 @@ def K_equ3_14(v_vec, B_1, B_2, r_1, r_2, k_inf_set=False):
     - how small a step this is valid for?
     '''
     #what to use for this value of the field?
-    B = LA.norm(B_1)
+    # B = LA.norm(B_1)
+    B = (LA.norm(B_1) + LA.norm(B_2)) /2
     
     v_n = LA.norm(v_vec)
     B_1_norm = LA.norm(B_1)
